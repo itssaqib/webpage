@@ -11,6 +11,7 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
   const { createPage } = actions;
   const postTemplate = path.resolve(`src/templates/post.js`);
   const tagTemplate = path.resolve('src/templates/tag.js');
+  const homeTemplate = path.resolve('src/templates/home.js'); // New homepage template
 
   const result = await graphql(`
     {
@@ -64,11 +65,19 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
       },
     });
   });
+
+  // Create homepage at "/"
+  createPage({
+    path: '/',
+    component: homeTemplate,
+    context: {
+      posts: posts.map(({ node }) => node.frontmatter.slug), // Optionally pass post slugs to homepage
+    },
+  });
 };
 
-// https://www.gatsbyjs.org/docs/node-apis/#onCreateWebpackConfig
+// https://www.gatsbyjs.org/docs/debugging-html-builds/#fixing-third-party-modules
 exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
-  // https://www.gatsbyjs.org/docs/debugging-html-builds/#fixing-third-party-modules
   if (stage === 'build-html' || stage === 'develop-html') {
     actions.setWebpackConfig({
       module: {
